@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+life_data.csv
+.venv/

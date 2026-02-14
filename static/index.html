@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff88;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: #1a1a1a;
+            color: #888;
+            border: 1px solid #333;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1em;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            background: #222;
+        }
+
+        .tab-btn.active {
+            background: #002211;
+            color: #00ff88;
+            border-color: #00ff88;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ── Stats ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            color: #00ff88;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #888;
+            font-size: 0.85em;
+        }
+
+        /* ── Form ── */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            background: #111;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            font-family: inherit;
+            font-size: 1em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00ff88;
+        }
+
+        /* чекбоксы-переключатели для витаминов */
+        .toggle-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .toggle-box {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .toggle-box input[type="checkbox"] {
+            display: none;
+        }
+
+        .toggle-box label {
+            display: block;
+            padding: 15px 10px;
+            background: #111;
+            border: 1px solid #333;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .toggle-box input:checked + label {
+            background: #002211;
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+
+        button.submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #00ff88;
+            color: #000;
+            border: none;
+            font-family: inherit;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button.submit-btn:hover {
+            background: #00cc6a;
+        }
+
+        button.submit-btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        /* ── Messages ── */
+        .msg {
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .msg.ok {
+            background: #002211;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .msg.err {
+            background: #220000;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+        }
+
+        /* ── History table ── */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 8px 6px;
+            border: 1px solid #333;
+            text-align: center;
+            font-size: 0.85em;
+        }
+
+        .history-table th {
+            background: #1a1a1a;
+            color: #00ff88;
+        }
+
+        .history-table tr:nth-child(even) {
+            background: #0f0f0f;
+        }
+
+        .energy-bar {
+            width: 100%;
+            height: 8px;
+            background: #222;
+            margin-top: 3px;
+        }
+
+        .energy-bar-fill {
+            height: 100%;
+            background: #00ff88;
+        }
+
+        /* ascii art */
+        .ascii {
+            text-align: center;
+            font-size: 0.35em;
+            line-height: 1.1;
+            color: #00ff88;
+            margin-top: 20px;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⚡ LIFE TRACKER</h1>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('add')">+ ADD DAY</button>
+        <button class="tab-btn" onclick="switchTab('stats')">📊 STATS</button>
+        <button class="tab-btn" onclick="switchTab('history')">📅 HISTORY</button>
+    </div>
+
+    <!-- ============ ADD TAB ============ -->
+    <div id="tab-add" class="tab-content active">
+
+        <div class="toggle-row">
+            <div class="toggle-box">
+                <input type="checkbox" id="d3">
+                <label for="d3">☀️ Vitamin D3</label>
+            </div>
+            <div class="toggle-box">
+                <input type="checkbox" id="magnesium">
+                <label for="magnesium">🧲 Magnesium</label>
+            </div>
+            <div class="toggle-box">
+                <input type="checkbox" id="creatine">
+                <label for="creatine">💪 Creatine</label>
+            </div>
+            <div class="toggle-box">
+                <input type="checkbox" id="omega3">
+                <label for="omega3">🐟 Omega-3</label>
+            </div>
+        </div>
+
+        <div class="toggle-row">
+            <div class="toggle-box">
+                <input type="checkbox" id="nofap">
+                <label for="nofap">🔥 NoFap</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="hours">⏰ Hours of code (0–24)</label>
+            <input type="number" id="hours" min="0" max="24" step="0.5" value="0">
+        </div>
+
+        <button class="submit-btn" onclick="submitDay()">SAVE DAY</button>
+
+        <div id="add-msg"></div>
+    </div>
+
+    <!-- ============ STATS TAB ============ -->
+    <div id="tab-stats" class="tab-content">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="value" id="s-hours">—</span>
+                <span class="label">Total Hours</span>
+            </div>
+            <div class="stat-card">
+                <span class="value" id="s-energy">—</span>
+                <span class="label">Avg Energy</span>
+            </div>
+            <div class="stat-card">
+                <span class="value" id="s-streak">—</span>
+                <span class="label">Code Streak</span>
+            </div>
+            <div class="stat-card">
+                <span class="value" id="s-days">—</span>
+                <span class="label">Days Logged</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ HISTORY TAB ============ -->
+    <div id="tab-history" class="tab-content">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>D3</th>
+                    <th>Mg</th>
+                    <th>Cr</th>
+                    <th>Ω3</th>
+                    <th>NF</th>
+                    <th>Hrs</th>
+                    <th>⚡</th>
+                    <th>🔥</th>
+                </tr>
+            </thead>
+            <tbody id="history-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // ── Переключение вкладок ──
+    function switchTab(name) {
+        // убираем active у всех кнопок и контентов
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        // ставим active нужному
+        document.getElementById('tab-' + name).classList.add('active');
+        // кнопке тоже
+        const btns = document.querySelectorAll('.tab-btn');
+        const map = { 'add': 0, 'stats': 1, 'history': 2 };
+        btns[map[name]].classList.add('active');
+
+        // подгружаем данные при открытии вкладки
+        if (name === 'stats') loadStats();
+        if (name === 'history') loadHistory();
+    }
+
+    // ── Добавить день ──
+    async function submitDay() {
+        const body = {
+            d3:        document.getElementById('d3').checked ? 1 : 0,
+            magnesium: document.getElementById('magnesium').checked ? 1 : 0,
+            creatine:  document.getElementById('creatine').checked ? 1 : 0,
+            omega3:    document.getElementById('omega3').checked ? 1 : 0,
+            nofap:     document.getElementById('nofap').checked ? 1 : 0,
+            hours:     parseFloat(document.getElementById('hours').value) || 0
+        };
+
+        try {
+            const res = await fetch('/api/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            const box = document.getElementById('add-msg');
+
+            if (data.ok) {
+                let text = `Energy: ${data.energy}/100 | Streak: ${data.streak}`;
+                if (data.status === 'GOD') text = '🔥 STATUS: GOD 🔥 ' + text;
+                box.className = 'msg ok';
+                box.textContent = text;
+            } else {
+                box.className = 'msg err';
+                box.textContent = data.error;
+            }
+        } catch (e) {
+            const box = document.getElementById('add-msg');
+            box.className = 'msg err';
+            box.textContent = 'Connection error';
+        }
+    }
+
+    // ── Загрузить статистику ──
+    async function loadStats() {
+        try {
+            const res = await fetch('/api/stats');
+            const d = await res.json();
+            document.getElementById('s-hours').textContent  = d.total_hours;
+            document.getElementById('s-energy').textContent = d.avg_energy;
+            document.getElementById('s-streak').textContent = d.streak;
+            document.getElementById('s-days').textContent   = d.days_count;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    // ── Загрузить историю ──
+    async function loadHistory() {
+        try {
+            const res = await fetch('/api/history');
+            const days = await res.json();
+            const tbody = document.getElementById('history-body');
+            tbody.innerHTML = '';
+
+            // показываем свежие сверху
+            days.reverse().forEach(d => {
+                const check = v => v ? '✅' : '❌';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${d.date}</td>
+                    <td>${check(d.d3)}</td>
+                    <td>${check(d.magnesium)}</td>
+                    <td>${check(d.creatine)}</td>
+                    <td>${check(d.omega3)}</td>
+                    <td>${check(d.nofap)}</td>
+                    <td>${d.hours}</td>
+                    <td>
+                        ${d.energy}
+                        <div class="energy-bar">
+                            <div class="energy-bar-fill" style="width:${d.energy}%"></div>
+                        </div>
+                    </td>
+                    <td>${d.streak}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+</script>
+
+</body>
+</html>
