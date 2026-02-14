@@ -17,12 +17,22 @@ def main():
         double_check = Analytic(history)
         if double_check.is_duplicate():
             sys.exit("Double day. You don't have chance.")
-        d3 = int(input("Vitamin d3: "))
-        magnesium = int(input(f"Vitamin Magnesium:  "))
-        creatine = int(input("Creatine: "))
-        omega3 = int(input("Vitamin omega3: "))
-        nofap = int(input("Nofap: "))
-        hours = float(input("hours of code: "))
+        try:
+            d3 = int(input("Vitamin d3: "))
+            magnesium = int(input(f"Vitamin Magnesium:  "))
+            creatine = int(input("Creatine: "))
+            omega3 = int(input("Vitamin omega3: "))
+            nofap = int(input("Nofap: "))
+        except ValueError:
+            sys.exit("Enter only 0")
+
+
+        try:
+            hours = float(input("hours of code: "))
+        except ValueError:
+            sys.exit("enter only hours of code 0, 0.5, 1+")
+
+
         if last_data:
             prev_streak = int(last_data['streak'])
         else:
@@ -32,34 +42,27 @@ def main():
             new_streak = prev_streak + 1
         else:
             new_streak = 0
-
-
         today = Day(today_date, d3, magnesium, creatine, omega3, nofap, hours, new_streak)
-        
         db.save_day(today)
 
-        
         energy_calc = today.calculate_energy()
+
         if energy_calc == 100:
             print("[STATUS] GOD")
-            double_check.asci_art("add")
-            
         else:
             print(f"your energy {energy_calc}")
-            double_check.asci_art("add")
-        
-        print("[Successfully.]")
     
-    if sys.argv[1] == "--stats":
+        double_check.asci_art("add")
+        print("[Successfully.]") 
+
+    elif sys.argv[1] == "--stats":
         history = db.get_all_history()
         report = Analytic(history)
         report.show_stats()
         report.asci_art("stats")
+        
 
       
-
-
-
 
 if __name__ == "__main__":
     main()
