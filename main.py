@@ -35,8 +35,6 @@ def main():
 
 
         today = Day(today_date, d3, magnesium, creatine, omega3, nofap, hours, new_streak)
-        history = db.get_all_history()
-        double_check = Analytic(history)
         
         db.save_day(today)
 
