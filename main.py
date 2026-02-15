@@ -34,7 +34,7 @@ def main():
 
 
         if last_data:
-            prev_streak = int(last_data['streak'])
+            prev_streak = (last_data['streak'])
         else:
             prev_streak = 0
         
@@ -59,7 +59,8 @@ def main():
         history = db.get_all_history()
         report = Analytic(history)
         report.show_stats()
-        report.asci_art("stats")
+        report.asci_art()
+        
         
 
       
