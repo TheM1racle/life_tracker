@@ -59,7 +59,7 @@ def main():
         history = db.get_all_history()
         report = Analytic(history)
         report.show_stats()
-        report.asci_art()
+        report.asci_art("stats")
         
         
 
